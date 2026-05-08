@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     guideNumber.className = 'minute-guide-number hidden';
                     guideNumber.textContent = i === 0 ? 0 : i;
                     
-                    const guideRadius = 158; // 時計の枠より少し外側
+                    const guideRadius = 160; // 時計の枠より少し外側
                     const gtx = guideRadius * Math.cos(rad);
                     const gty = guideRadius * Math.sin(rad);
                     

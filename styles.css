@@ -1,0 +1,703 @@
+:root {
+    --bg-color: #e0e5ec;
+    --clock-bg: #ffffff;
+    --text-color: #2b3a4a;
+    --hour-color: #ff5277;
+    --minute-color: #3a86ff;
+    --accent-color: #ffb703;
+    
+    --shadow-light: #ffffff;
+    --shadow-dark: #a3b1c6;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none; /* テキスト選択を防ぐ（ドラッグしやすくするため） */
+    -webkit-user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+header {
+    text-align: center;
+}
+
+h1 {
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+p {
+    color: #6c7a89;
+    font-size: 1.1rem;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 2.5rem;
+}
+
+/* --- Analog Clock --- */
+.clock-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    /* Neumorphism style for the outer ring */
+    box-shadow: 
+        12px 12px 24px var(--shadow-dark), 
+        -12px -12px 24px var(--shadow-light);
+    padding: 15px;
+    background: var(--bg-color);
+}
+
+.clock {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--clock-bg);
+    box-shadow: inset 4px 4px 10px rgba(0,0,0,0.05), inset -4px -4px 10px rgba(255,255,255,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Markers and Numbers */
+.clock-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-color: #d1d8e0;
+}
+
+.marker.minute-marker {
+    width: 2px;
+    height: 6px;
+    border-radius: 2px;
+}
+
+.marker.hour-marker {
+    width: 4px;
+    height: 12px;
+    background-color: #8395a7;
+    border-radius: 2px;
+}
+
+.number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--text-color);
+    transform: translate(-50%, -50%);
+}
+
+/* Hands */
+.hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+    z-index: 10;
+    cursor: grab;
+    /* Transition is removed during drag for real-time feel */
+    transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+}
+
+.hand:active {
+    cursor: grabbing;
+}
+
+.hour-hand {
+    width: 10px;
+    height: 80px;
+    margin-left: -5px; /* width/2 */
+    z-index: 11;
+}
+
+.hour-hand .hand-body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--hour-color);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(255, 82, 119, 0.4);
+}
+
+.minute-hand {
+    width: 6px;
+    height: 115px;
+    margin-left: -3px; /* width/2 */
+    z-index: 12;
+}
+
+.minute-hand .hand-body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--minute-color);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(58, 134, 255, 0.4);
+}
+
+/* 広めのタッチ領域で見えない要素を配置し、操作しやすくする */
+.touch-area {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -10px;
+    background-color: transparent;
+}
+
+/* Center Pin */
+.center-pin {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #ffffff;
+    border: 5px solid var(--text-color);
+    border-radius: 50%;
+    z-index: 15;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* --- Digital Display --- */
+.digital-display {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1.5rem 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.time-box {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 4.5rem;
+    line-height: 1;
+}
+
+.hour-text {
+    color: var(--hour-color);
+}
+
+.minute-text {
+    color: var(--minute-color);
+}
+
+.colon {
+    color: var(--text-color);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.time-label {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: -5px;
+}
+
+.label-hour {
+    color: var(--hour-color);
+    padding-left: 10px;
+}
+
+.label-minute {
+    color: var(--minute-color);
+    padding-right: 15px;
+}
+
+/* --- Controls --- */
+.controls {
+    display: flex;
+    gap: 1rem;
+}
+
+button {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+}
+
+button:active {
+    box-shadow: inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light);
+}
+
+.primary-btn {
+    background-color: var(--accent-color);
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.primary-btn:hover {
+    background-color: #ffc333;
+}
+
+.secondary-btn {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.secondary-btn:hover {
+    background-color: #eaf0f6;
+}
+
+/* レスポンシブ */
+@media (max-width: 400px) {
+    .clock-wrapper {
+        width: 280px;
+        height: 280px;
+    }
+    
+    h1 {
+        font-size: 1.6rem;
+    }
+    
+    .time-box {
+        font-size: 3.5rem;
+    }
+}
+
+/* --- Modal --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background-color: var(--clock-bg);
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #888;
+    box-shadow: none;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.close-btn:hover {
+    color: var(--text-color);
+}
+
+/* --- Calc Tabs --- */
+.calc-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.calc-tab {
+    background-color: transparent;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #888;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.calc-tab:hover {
+    color: var(--text-color);
+}
+
+.calc-tab.active {
+    color: var(--minute-color);
+    border-bottom: 3px solid var(--minute-color);
+}
+
+/* --- Calc Controls --- */
+.calc-controls {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.calc-label {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.duration-controls-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+}
+
+.duration-controls-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.btn-group-half {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.dur-btn {
+    background-color: #f0f4f8;
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #d1d8e0;
+}
+
+.dur-btn:hover {
+    background-color: #eaf0f6;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.duration-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    min-width: 100px;
+}
+
+#calc-duration {
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    margin-right: 5px;
+}
+
+/* --- Timeline Diagram --- */
+.calc-result {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px dashed #d1d8e0;
+}
+
+.diagram-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.diagram-start, .diagram-end {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Mini Clock */
+.mini-clock {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: var(--clock-bg);
+    border: 6px solid var(--minute-color);
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini-clock-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #fffae6; /* Soft yellow bg like the reference image */
+}
+
+.mini-clock .center-pin {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border: 3px solid var(--hour-color);
+    border-radius: 50%;
+    z-index: 15;
+}
+
+.mini-clock .hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+}
+
+.mini-clock .hour-hand {
+    width: 6px;
+    height: 35px;
+    margin-left: -3px;
+    z-index: 11;
+}
+
+.mini-clock .hour-hand .hand-body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--hour-color);
+    border-radius: 3px;
+}
+
+.mini-clock .minute-hand {
+    width: 4px;
+    height: 50px;
+    margin-left: -2px;
+    z-index: 12;
+}
+
+.mini-clock .minute-hand .hand-body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--minute-color);
+    border-radius: 2px;
+}
+
+/* Timeline */
+.diagram-timeline {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    min-width: 250px;
+    height: 150px;
+}
+
+.timeline-base {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #333;
+}
+
+.time-point {
+    position: absolute;
+    top: -40px;
+    transform: translateX(-50%);
+    font-weight: bold;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    background-color: #e3f2fd; /* Light blue background for standard points */
+    border: 1px solid #90caf9;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* 〇時ちょうどのポイントは背景なしで少し大きく表示 */
+.time-point-exact {
+    background-color: transparent;
+    border: none;
+    font-size: 1.3rem;
+    top: -45px;
+}
+
+.time-point-line {
+    position: absolute;
+    top: -15px;
+    width: 2px;
+    height: 30px;
+    background-color: #333;
+    transform: translateX(-50%);
+}
+
+.timeline-arrow-group {
+    position: absolute;
+    top: 15px; /* Below the base line */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.timeline-arrow-box {
+    background-color: #ffdce0; /* Soft pink */
+    border: 2px solid #ff8fa3;
+    border-radius: 4px;
+    padding: 6px 15px;
+    font-weight: bold;
+    position: relative;
+    color: #c0392b;
+    font-size: 1.1rem;
+}
+
+/* Arrow right shape using pseudo-element */
+.timeline-arrow-box::after {
+    content: '';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 14px solid #ff8fa3;
+}
+
+.timeline-arrow-box::before {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 12px solid #ffdce0;
+    z-index: 1;
+}
+
+/* Left pointing arrow modifier */
+.timeline-arrow-box.arrow-left::after {
+    right: auto;
+    left: -14px;
+    border-left: none;
+    border-right: 14px solid #ff8fa3;
+}
+
+.timeline-arrow-box.arrow-left::before {
+    right: auto;
+    left: -10px;
+    border-left: none;
+    border-right: 12px solid #ffdce0;
+}
+
+/* Total Duration Box */
+.total-duration-box {
+    position: absolute;
+    top: 65px; /* Moved up to sit on top of the line */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    border: 2px solid #ff8fa3;
+    border-radius: 4px;
+    padding: 5px 20px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #c0392b;
+    z-index: 2; /* Sit above the line */
+}
+
+.total-arrow-line {
+    position: absolute;
+    top: 75px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    border-left: 2px solid #333;
+    border-right: 2px solid #333;
+    border-bottom: 2px solid #333;
+}
+
+.total-arrow-line::after {
+    display: none; /* Removed the overlapping ↔ character */
+}
+
+@media (max-width: 600px) {
+    .diagram-container {
+        flex-direction: column;
+    }
+    .diagram-timeline {
+        width: 100%;
+        margin: 2rem 0 4rem 0;
+    }
+}

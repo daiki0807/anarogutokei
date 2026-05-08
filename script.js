@@ -59,6 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 number.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
                 faceElement.appendChild(number);
                 
+                // 分のガイド数字の配置（外側）
+                if (!isMini) {
+                    const guideNumber = document.createElement('div');
+                    guideNumber.className = 'minute-guide-number hidden';
+                    guideNumber.textContent = i === 0 ? 0 : i;
+                    
+                    const guideRadius = 158; // 時計の枠より少し外側
+                    const gtx = guideRadius * Math.cos(rad);
+                    const gty = guideRadius * Math.sin(rad);
+                    
+                    guideNumber.style.transform = `translate(calc(-50% + ${gtx}px), calc(-50% + ${gty}px))`;
+                    faceElement.appendChild(guideNumber);
+                }
+                
                 // 目盛りの配置
                 marker.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(${hourMarkerY}px)`;
             } else {
@@ -231,6 +245,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnReset.addEventListener('click', () => {
         setTime(12, 0);
+    });
+
+    const btnToggleMinuteGuide = document.getElementById('btn-toggle-minute-guide');
+    let showMinuteGuide = false;
+
+    btnToggleMinuteGuide.addEventListener('click', () => {
+        showMinuteGuide = !showMinuteGuide;
+        const guides = document.querySelectorAll('.minute-guide-number');
+        guides.forEach(guide => {
+            if (showMinuteGuide) {
+                guide.classList.remove('hidden');
+            } else {
+                guide.classList.add('hidden');
+            }
+        });
+        
+        // ボタンの見た目を変える
+        if (showMinuteGuide) {
+            btnToggleMinuteGuide.classList.remove('secondary-btn');
+            btnToggleMinuteGuide.classList.add('primary-btn');
+        } else {
+            btnToggleMinuteGuide.classList.remove('primary-btn');
+            btnToggleMinuteGuide.classList.add('secondary-btn');
+        }
     });
 
     // --- 計算モードのロジック ---

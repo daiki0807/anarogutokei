@@ -129,6 +129,17 @@ main {
     transform: translate(-50%, -50%);
 }
 
+.minute-guide-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--minute-color);
+    transform: translate(-50%, -50%);
+}
+
 /* Hands */
 .hand {
     position: absolute;
